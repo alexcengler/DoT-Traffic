@@ -1,6 +1,9 @@
 library(haven)
 library(dplyr)
 library(ggplot2)
+library(RColorBrewer)
+library(lattice)
+library(directlabels)
 
 
 setwd("/Users/alexengler/Desktop/DoT-Traffic")
@@ -15,11 +18,6 @@ dim(acc2013)
 dim(acc2014)
 dim(acc2015)
 
-## ST_CASE is Unique Identifier
-table(table(acc2015$ST_CASE))
-
-## By State:
-as.data.frame(table(acc$STATE))
 
 ## Number Fatally Injured Persons (Range 1-10):
 acc$FATALS
@@ -33,6 +31,11 @@ acc2015_lim$ROAD_FNC <- NA
 
 acc <- rbind(acc2011, acc2012, acc2013, acc2014, acc2015_lim)
 
+## ST_CASE is Unique Identifier (Only Unique to the Year)
+table(table(acc$ST_CASE))
+
+## By State:
+as.data.frame(table(acc$STATE))
 
 
 agg <- acc %>% 
@@ -40,8 +43,15 @@ agg <- acc %>%
   summarize(tot = sum(FATALS))
 
 
-ggplot(agg, aes(x=YEAR, y=STATE)) + 
-  geom_tile(aes(fill = tot), colour = "white") 
-  + scale_fill_gradient(low = "white", high = "steelblue")
+p <- ggplot(agg, aes(x=YEAR, y=STATE)) + 
+  geom_tile(aes(fill = log10(tot)), colour = "white") + 
+  scale_fill_distiller(palette="RdBu") +
+  theme_classic()
+
+direct.label(p)
+
+ggplot(agg, aes(x=YEAR, y=tot, color=as.factor(STATE))) + 
+  geom_line() + theme_classic() + theme(legend.position="none")
+
 
 
