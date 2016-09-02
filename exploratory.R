@@ -2,12 +2,12 @@ library(haven)
 library(dplyr)
 library(ggplot2)
 library(RColorBrewer)
-library(lattice)
-library(directlabels)
 
 
 setwd("/Users/alexengler/Desktop/DoT-Traffic")
 
+acc2009 <- read_sas("./data/FSAS2009/accident.sas7bdat")
+acc2010 <- read_sas("./data/FSAS2010/accident.sas7bdat")
 acc2011 <- read_sas("./data/FSAS2011/accident.sas7bdat")
 acc2012 <- read_sas("./data/FSAS2012/accident.sas7bdat")
 acc2013 <- read_sas("./data/FARS2013NationalSAS/accident.sas7bdat")
