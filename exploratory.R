@@ -8,6 +8,9 @@ library(RColorBrewer)
 
 setwd("/Users/alexengler/Desktop/DoT-Traffic")
 
+# acc2007 <- read_sas("./data/FSAS2007/accident.sas7bdat")
+# acc2008 <- read_sas("./data/FSAS2008/accident.sas7bdat")
+
 acc2009 <- read_sas("./data/FSAS2009/accident.sas7bdat")
 acc2010 <- read_sas("./data/FSAS2010/accident.sas7bdat")
 acc2011 <- read_sas("./data/FSAS2011/accident.sas7bdat")
@@ -70,7 +73,7 @@ ggplot(agg2, aes(x=YEAR, y=tot, color=as.factor(State.Abbreviation))) +
 
 agg_perc_change <- agg
 for (i in unique(agg_perc_change$State.Abbreviation)){
-  agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] <- (agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] - agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]) / agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]
+    agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] <- (agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] - agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]) / agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]
 }
 
 ggplot(agg_perc_change, aes(x=YEAR, y=State.Abbreviation)) + 
