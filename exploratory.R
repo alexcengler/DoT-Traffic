@@ -18,18 +18,30 @@ dim(acc2013)
 dim(acc2014)
 dim(acc2015)
 
-
-## Number Fatally Injured Persons (Range 1-10):
-acc$FATALS
-
 ## Data Cleaning and Merging
+colnames(acc2011)[!colnames(acc2011) %in% colnames(acc2010)]
+acc2010_extra <- acc2010
+acc2010_extra$PVH_INVL <- NA
+acc2010_extra$PERNOTMVIT <- NA
+acc2010_extra$PERMVIT <- NA
+
 colnames(acc2015)[!colnames(acc2015) %in% colnames(acc2014)]
 acc2015_lim <- select(acc2015, -c(RUR_URB, FUNC_SYS, RD_OWNER))
 
 colnames(acc2014)[!colnames(acc2014) %in% colnames(acc2015)]
 acc2015_lim$ROAD_FNC <- NA
 
-acc <- rbind(acc2011, acc2012, acc2013, acc2014, acc2015_lim)
+acc <- rbind(acc2010_extra, acc2011, acc2012, acc2013, acc2014, acc2015_lim)
+
+## Number Fatally Injured Persons (Range 1-10):
+table(acc$FATALS)
+
+## Merge on FIPS Code
+fips <- read.csv("./data/fips_codes.csv")
+fips <- fips[!duplicated(fips[2:3]),]
+
+## Lost 12 rows come back to this later (hahah just kidding - ignore forever):
+acc <- merge(fips, acc, by.x=c("State.FIPS.Code","County.FIPS.Code"), by.y=c("STATE","COUNTY"))
 
 ## ST_CASE is Unique Identifier (Only Unique to the Year)
 table(table(acc$ST_CASE))
@@ -43,14 +55,12 @@ agg <- acc %>%
   summarize(tot = sum(FATALS))
 
 
-p <- ggplot(agg, aes(x=YEAR, y=STATE)) + 
+ggplot(agg, aes(x=YEAR, y=State.Abbreviation)) + 
   geom_tile(aes(fill = log10(tot)), colour = "white") + 
   scale_fill_distiller(palette="RdBu") +
   theme_classic()
 
-direct.label(p)
-
-ggplot(agg, aes(x=YEAR, y=tot, color=as.factor(STATE))) + 
+ggplot(agg, aes(x=YEAR, y=tot, color=as.factor(State.Abbreviation))) + 
   geom_line() + theme_classic() + theme(legend.position="none")
 
 
