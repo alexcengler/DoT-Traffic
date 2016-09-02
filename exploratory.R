@@ -1,3 +1,5 @@
+options(scipen=99999)
+
 library(haven)
 library(dplyr)
 library(ggplot2)
@@ -38,7 +40,7 @@ table(acc$FATALS)
 
 ## Merge on FIPS Code
 fips <- read.csv("./data/fips_codes.csv")
-fips <- fips[!duplicated(fips[2:3]),]
+fips <- fips[!duplicated(fips[c(1:3,6)]),]
 
 ## Lost 12 rows come back to this later (hahah just kidding - ignore forever):
 acc <- merge(fips, acc, by.x=c("State.FIPS.Code","County.FIPS.Code"), by.y=c("STATE","COUNTY"))
@@ -51,16 +53,32 @@ as.data.frame(table(acc$STATE))
 
 
 agg <- acc %>% 
-  group_by(STATE, YEAR) %>%
+  group_by(State.Abbreviation, YEAR) %>%
   summarize(tot = sum(FATALS))
 
+agg_net_change <- agg
+for (i in unique(agg_net_change$State.Abbreviation)){
+  agg_net_change$tot[which(agg_net_change$State.Abbreviation == i)] <- agg_net_change$tot[which(agg_net_change$State.Abbreviation == i)] - agg_net_change$tot[which(agg_net_change$State.Abbreviation == i & agg_net_change$YEAR == 2010)]
+}
 
-ggplot(agg, aes(x=YEAR, y=State.Abbreviation)) + 
-  geom_tile(aes(fill = log10(tot)), colour = "white") + 
+ggplot(agg2, aes(x=YEAR, y=tot, color=as.factor(State.Abbreviation))) + 
+  geom_line() + theme_classic() + theme(legend.position="none")
+
+
+
+
+
+agg_perc_change <- agg
+for (i in unique(agg_perc_change$State.Abbreviation)){
+  agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] <- (agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i)] - agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]) / agg_perc_change$tot[which(agg_perc_change$State.Abbreviation == i & agg_perc_change$YEAR == 2010)]
+}
+
+ggplot(agg_perc_change, aes(x=YEAR, y=State.Abbreviation)) + 
+  geom_tile(aes(fill = tot), colour = "white") + 
   scale_fill_distiller(palette="RdBu") +
   theme_classic()
 
-ggplot(agg, aes(x=YEAR, y=tot, color=as.factor(State.Abbreviation))) + 
+ggplot(agg_perc_change, aes(x=YEAR, y=tot, color=as.factor(State.Abbreviation))) + 
   geom_line() + theme_classic() + theme(legend.position="none")
 
 
